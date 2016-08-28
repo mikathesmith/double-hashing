@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "mylib.h"
+#include "flexarray.h"
+
+#define VALUE 10
+
+struct flexarrayrec {
+    int capacity;
+    int itemcount;
+    int *items;
+};
+
+
+flexarray flexarray_new() {
+    flexarray result = emalloc(sizeof *result);
+    result->capacity = 2;
+    result->itemcount = 0;
+    result->items = emalloc(result->capacity * sizeof result->items[0]);
+    return result;
+}
+
+void flexarray_append(flexarray f, int num) {
+    if (f->itemcount == f->capacity) {
+        f->capacity+=f->capacity;
+        f->items=erealloc(f->items, f->capacity * sizeof f->items[0]);
+        /* do the old "double the capacity" trick */
+    }
+    f->items[f->itemcount++]=num;     
+    /* insert the item in the last free space */
+}
+void flexarray_print(flexarray f) {
+    int i;
+    for(i=0;i<f->itemcount;i++){
+        printf("%d\n",f->items[i]);
+    }
+    /* a "for" loop to print out each cell of f->items */
+}
+
+
+    
+
+static void quicksort(int *a, int n){
+    int pivot, i, j, temp;
+
+    if(n < 2){
+        return;
+    }else{
+        pivot=a[0];
+        i=-1;
+        j=n;
+
+        for(;;){
+            do{
+                i++;
+            }while(a[i] < pivot);
+
+            do{
+                j--;
+            }while(a[j] > pivot);
+
+            if(i<j){
+                temp=a[i];
+                a[i]=a[j];
+                a[j]=temp;
+            }else{
+                break;
+            }
+        }
+
+        quicksort(a, j+1);
+        quicksort(a+j+1, n-j-1);       
+    }   
+}
+
+
+/**This method sorts numbers in ascending order.*/
+void flexarray_sort(flexarray f) {
+    quicksort(f->items, f->itemcount); 
+}
+
+
+
+void flexarray_free(flexarray f) {
+    /* free the memory associated with the flexarray */
+    free(f->items);
+}
